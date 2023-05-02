@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
+  IsNumber,
   IsString,
   MaxLength,
   MinLength,
@@ -25,4 +26,8 @@ export class RegisterDto {
   @MinLength(6)
   @MaxLength(20)
   password: string;
+
+  @ApiProperty()
+  @IsNumber()
+  school_id: number;
 }

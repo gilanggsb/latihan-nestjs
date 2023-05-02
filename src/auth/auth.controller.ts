@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  Patch,
   Post,
   Req,
   UploadedFile,
@@ -15,6 +17,7 @@ import { AuthGuard } from './auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { HelpersService } from 'src/helpers/helpers.service';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { UpdateProfileDto } from './dto/UpdateProfileDto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -61,5 +64,14 @@ export class AuthController {
       req.user.id,
       'uploads/images/' + file.filename,
     );
+  }
+  @UseGuards(AuthGuard)
+  @Patch(':user_id')
+  @ApiBearerAuth('accessToken')
+  async updateProfile(
+    @Param('user_id') user_id: any,
+    @Body() data: UpdateProfileDto,
+  ) {
+    return await this.service.updateProfile(+user_id, data);
   }
 }

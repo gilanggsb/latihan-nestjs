@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/RegisterDto';
 import { LoginDto } from './dto/LoginDto';
 import { compare, hash } from 'bcryptjs';
+import { UpdateProfileDto } from './dto/UpdateProfileDto';
 
 @Injectable()
 export class AuthService {
@@ -86,7 +87,7 @@ export class AuthService {
     try {
       const user = await this.prisma.users.findFirst({
         where: { id: user_id },
-        include: { tasks: true },
+        include: { tasks: true, school: true },
       });
       const excludeUser = await this.helpers.exclude(user, [
         'password',
@@ -134,11 +135,28 @@ export class AuthService {
 
       return this.helpers.generateResponse('Success Upload Avatar');
     } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
+      return this.helpers.catchError(error);
+    }
+  }
+  async updateProfile(user_id: number, data: UpdateProfileDto) {
+    try {
+      const user = await this.prisma.users.update({
+        where: { id: user_id },
+        data,
+      });
+      if (!user) {
+        throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
       }
-
-      throw new HttpException(error, HttpStatus.BAD_GATEWAY);
+      const excludeUser = this.helpers.exclude(user, [
+        'password',
+        'created_at',
+      ]);
+      return this.helpers.generateResponse(
+        'Update Profile Success',
+        excludeUser,
+      );
+    } catch (error) {
+      return this.helpers.catchError(error);
     }
   }
 }
